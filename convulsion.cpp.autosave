@@ -6,6 +6,10 @@ Convulsion::Convulsion(){
 
 }
 
+QImage Convulsion::applyGauss(const QImage &image, const double gamma){
+    
+}
+
 QImage Convulsion::applySobelKernel(const QImage &image, const int kernel[3][3]){
     const int width = image.width();
     const int height = image.height();

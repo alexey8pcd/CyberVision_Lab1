@@ -15,13 +15,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     imagehandler.cpp \
-    convulsion.cpp \
-    kernel.cpp
+    convulsion.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
     imagehandler.h \
-    kernel.h \
     convulsion.h
 
 FORMS    += mainwindow.ui

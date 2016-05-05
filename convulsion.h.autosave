@@ -13,6 +13,7 @@ class Convulsion
         static QImage applySobelKernel(const QImage &image, const int kernel[3][3]);
         static QImage applySobel(const QImage &image);
         static QRgb* normalize(QRgb* bufferInput, int min, int max, int length);
+        static QImage applyGauss(const QImage &image, const double gamma);
 };
 
 #endif // CONVULSION_H
