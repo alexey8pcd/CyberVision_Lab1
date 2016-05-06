@@ -22,6 +22,7 @@ class ImageHandler
         QPixmap getFilteredSobelY();
         QPixmap getFilteredGauss(double sigma);
         void setImage(QString fileName);
+        QImage getImage();
         ImageHandler();
         ImageHandler(QString fileName);
 };

@@ -52,10 +52,22 @@ void MainWindow::on_sliderRadius_valueChanged(int value)
     ui->lRadius->setText(QString::number(value));
 }
 
-void MainWindow::on_bGauss_clicked()
-{
+void MainWindow::on_bGauss_clicked(){
     const double sigma = ui->sliderRadius->value();
     if(handler != NULL){
         ui->label->setPixmap(handler->getFilteredGauss(sigma));
+
+    }
+}
+
+void MainWindow::on_bOctaves_clicked()
+{
+    double sigma = ui->dsStartSigma->value();
+    int octavesCount = ui->spOctavesCount->value();
+    int levelPerOctave = ui->spLevelPerOctave->value();
+    if(handler != NULL){
+        PyramidBuilder builder(octavesCount, levelPerOctave, sigma);
+        QImage image = handler->getImage();
+        builder.createOctaves(image);
     }
 }

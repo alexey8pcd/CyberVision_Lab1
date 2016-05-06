@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "imagehandler.h"
+#include "pyramid.h"
 
 namespace Ui {
     class MainWindow;
@@ -25,6 +26,8 @@ class MainWindow : public QMainWindow
         void on_sliderRadius_valueChanged(int value);
 
         void on_bGauss_clicked();
+
+        void on_bOctaves_clicked();
 
 private:
         Ui::MainWindow *ui;

@@ -15,6 +15,7 @@ class Convolution
         static QRgb* normalize(QRgb* bufferInput, int min, int max, int length);
         static QRgb* normalizeD(double * bufferInput, double min, double max, int length);
         static QImage applyGauss(const QImage &image, const double sigma);
+
 };
 
 #endif // CONVULSION_H

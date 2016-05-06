@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     imagehandler.cpp \
     convolution.cpp \
-    imageutil.cpp
+    imageutil.cpp \
+    pyramid.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
     imagehandler.h \
-    convolution.h
+    convolution.h \
+    pyramid.h
 
 FORMS    += mainwindow.ui

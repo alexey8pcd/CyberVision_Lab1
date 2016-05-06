@@ -10,6 +10,10 @@ ImageHandler::ImageHandler(QString fileName){
     this->height = original.height();
 }
 
+QImage ImageHandler::getImage(){
+    return original;
+}
+
 void ImageHandler::setImage(QString fileName){
     this->original = QImage(fileName).convertToFormat(QImage::Format_ARGB32);
     this->width = original.width();
@@ -21,7 +25,10 @@ QPixmap ImageHandler::getOriginal(){
 }
 
 QPixmap ImageHandler::getFilteredGauss(double sigma){
-    return QPixmap::fromImage(Convolution::applyGauss(original, sigma));
+    QImage img = Convolution::applyGauss(original, sigma);
+    int level = (int)log2(sigma);
+    img = ImageUtil::downscale(img, level);
+    return QPixmap::fromImage(img);
 }
 
 QPixmap ImageHandler::getFilteredSobel(){
