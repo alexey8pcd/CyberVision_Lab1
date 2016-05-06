@@ -7,7 +7,7 @@
 #include "QDebug"
 #include "QRgb"
 #include "qmath.h"
-#include "convulsion.h"
+#include "convolution.h"
 class ImageHandler
 {
     private:
@@ -20,7 +20,8 @@ class ImageHandler
         QPixmap getFilteredSobel();
         QPixmap getFilteredSobelX();
         QPixmap getFilteredSobelY();
-        QPixmap getFilteredGauss(double gamma);
+        QPixmap getFilteredGauss(double sigma);
+        void setImage(QString fileName);
         ImageHandler();
         ImageHandler(QString fileName);
 };

@@ -22,8 +22,11 @@ class MainWindow : public QMainWindow
         void on_bSobelY_clicked();
 
         void on_bSobelXY_clicked();
+        void on_sliderRadius_valueChanged(int value);
 
-    private:
+        void on_bGauss_clicked();
+
+private:
         Ui::MainWindow *ui;
         ImageHandler* handler = NULL;
 };

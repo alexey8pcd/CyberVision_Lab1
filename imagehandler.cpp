@@ -10,16 +10,22 @@ ImageHandler::ImageHandler(QString fileName){
     this->height = original.height();
 }
 
+void ImageHandler::setImage(QString fileName){
+    this->original = QImage(fileName).convertToFormat(QImage::Format_ARGB32);
+    this->width = original.width();
+    this->height = original.height();
+}
+
 QPixmap ImageHandler::getOriginal(){
     return QPixmap::fromImage(original);
 }
 
-QPixmap ImageHandler::getFilteredGauss(int radius){
-    return getOriginal();
+QPixmap ImageHandler::getFilteredGauss(double sigma){
+    return QPixmap::fromImage(Convolution::applyGauss(original, sigma));
 }
 
 QPixmap ImageHandler::getFilteredSobel(){
-    QImage copy = Convulsion::applySobel(original);
+    QImage copy = Convolution::applySobel(original);
     return QPixmap::fromImage(copy);
 }
 
@@ -29,7 +35,7 @@ QPixmap ImageHandler::getFilteredSobelX(){
         {-2,0,2},
         {-1,0,1}
     };
-    QImage copy = Convulsion::applySobelKernel(original, sobelKernelX);
+    QImage copy = Convolution::applySobelKernel(original, sobelKernelX);
     return QPixmap::fromImage(copy);
 }
 
@@ -39,7 +45,7 @@ QPixmap ImageHandler::getFilteredSobelY(){
         {0,0,0},
         {1,2,1}
     };
-    QImage copy = Convulsion::applySobelKernel(original, sobelKernelY);
+    QImage copy = Convolution::applySobelKernel(original, sobelKernelY);
     return QPixmap::fromImage(copy);
 }
 
