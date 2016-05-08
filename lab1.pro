@@ -14,15 +14,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    imagehandler.cpp \
     convolution.cpp \
     imageutil.cpp \
-    pyramid.cpp
+    pyramid.cpp \
+    kernel.cpp \
+    fimage.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
-    imagehandler.h \
     convolution.h \
-    pyramid.h
+    pyramid.h \
+    kernel.h \
+    fimage.h \
+    edgetype.h
 
 FORMS    += mainwindow.ui

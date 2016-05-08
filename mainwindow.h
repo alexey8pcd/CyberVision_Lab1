@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "imagehandler.h"
 #include "pyramid.h"
 
 namespace Ui {
@@ -21,17 +20,14 @@ class MainWindow : public QMainWindow
         void on_bLoadImage_clicked();
         void on_bSobelX_clicked();
         void on_bSobelY_clicked();
-
         void on_bSobelXY_clicked();
         void on_sliderRadius_valueChanged(int value);
-
         void on_bGauss_clicked();
-
         void on_bOctaves_clicked();
 
 private:
+        QImage original;
         Ui::MainWindow *ui;
-        ImageHandler* handler = NULL;
 };
 
 #endif // MAINWINDOW_H

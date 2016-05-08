@@ -1,11 +1,11 @@
 #include "imageutil.h"
 
-QRgb ImageUtil::toGray(QRgb bright){
-    int red = (bright >> 16) & 0xFF;
-    int green = (bright >> 8) & 0xFF;
-    int blue = bright & 0xFF;
-    return ((QRgb)(red * 0.299 + green
-                       * 0.587 + blue * 0.114)) & 0xFF;
+QRgb ImageUtil::toQRgb(float value){
+    QRgb bright = (QRgb) (value * MAX_INTENSITY) & 0xFF;
+    int red = bright << 16;
+    int green = bright << 8;
+    int blue = bright;
+    return (QRgb)(red + green + blue);
 }
 
 QPixmap ImageUtil::toGrayscale(QPixmap pixmap){
@@ -24,6 +24,15 @@ QImage ImageUtil::toImage(QRgb *buffer, int width, int height){
         }
     }
     return resultImage;
+}
+
+float ImageUtil::toFloatValue(QRgb bright){
+    int red = (bright >> 16) & 0xFF;
+    int green = (bright >> 8) & 0xFF;
+    int blue = bright & 0xFF;
+    QRgb raw = ((QRgb)(0.299 * red + 0.587 * green
+                       + 0.114 * blue)) & 0xFF;
+    return ((float)raw) / MAX_INTENSITY;
 }
 
 QImage ImageUtil::downscale(QImage &image, int level){
