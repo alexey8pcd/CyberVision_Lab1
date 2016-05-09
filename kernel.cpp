@@ -8,7 +8,7 @@ void Kernel::setHeight(int value) {
     this->heigth = value;
 }
 
-void Kernel::setValues(float *values, int radius){
+void Kernel::setValues(float *values, int radius) {
     this->values = values;
     this->width = radius;
     this->heigth = radius;
@@ -18,8 +18,7 @@ int Kernel::getWidth() {
     return width;
 }
 
-int Kernel::getHeight()
-{
+int Kernel::getHeight() {
     return heigth;
 }
 
@@ -64,7 +63,7 @@ Kernel *Kernel::createGaussSeparateKernelY(double sigma) {
     return xKernel;
 }
 
-Kernel::Kernel(){
+Kernel::Kernel() {
     this->values = new float[0];
     this->width = 0;
 }
@@ -75,7 +74,7 @@ Kernel::Kernel(float *values, int width, int height) {
     this->heigth = height;
 }
 
-Kernel::Kernel(float *values, int radius){
+Kernel::Kernel(float *values, int radius) {
     this->values = values;
     this->width = radius;
     this->heigth = radius;

@@ -1,10 +1,11 @@
-#ifndef OCTAVE_H
-#define OCTAVE_H
+#ifndef PYRAMIDBUILDER_H
+#define PYRAMIDBUILDER_H
 #include "math.h"
 #include "qlist.h"
 #include "qimage.h"
 #include "convolution.h"
 #include "qdebug.h"
+#include "edgetype.h"
 
 class PyramidBuilder
 {
@@ -15,7 +16,7 @@ private:
 public:
     PyramidBuilder(int octaveCount, int levelPerOctave, double sigmaAlpha);
     PyramidBuilder();
-    void createOctaves(QImage &image);
+    void createOctaves(FImage &image, EdgeType type);
 };
 
 #endif // OCTAVE_H

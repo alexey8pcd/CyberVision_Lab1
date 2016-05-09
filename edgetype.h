@@ -1,7 +1,5 @@
-#ifndef EDGESTYPE
-#define EDGESTYPE
-
-#endif // EDGESTYPE
+#ifndef EDGETYPE
+#define EDGETYPE
 
 enum EdgeType {
     EdgeType_OUTSIDE_BLACK,
@@ -9,3 +7,7 @@ enum EdgeType {
     EdgeType_MIRROR_EDGES,
     EdgeType_WRAP_EDGES
 };
+
+#endif // EDGETYPE
+
+

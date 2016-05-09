@@ -12,13 +12,15 @@ TARGET = lab1
 TEMPLATE = app
 
 
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     convolution.cpp \
     imageutil.cpp \
     pyramid.cpp \
     kernel.cpp \
-    fimage.cpp
+    fimage.cpp \
+    interestpointsdetector.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
@@ -26,6 +28,7 @@ HEADERS  += mainwindow.h \
     pyramid.h \
     kernel.h \
     fimage.h \
+    interestpointsdetector.h \
     edgetype.h
 
 FORMS    += mainwindow.ui

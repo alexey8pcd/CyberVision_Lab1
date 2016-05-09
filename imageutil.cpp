@@ -8,24 +8,6 @@ QRgb ImageUtil::toQRgb(float value){
     return (QRgb)(red + green + blue);
 }
 
-QPixmap ImageUtil::toGrayscale(QPixmap pixmap){
-    QImage image = pixmap.toImage();
-    const QImage grayscale = image.convertToFormat(QImage::Format_Grayscale8);
-    return QPixmap::fromImage(grayscale);
-}
-
-QImage ImageUtil::toImage(QRgb *buffer, int width, int height){
-    QImage resultImage(width, height, QImage::Format_RGB32);
-    for (int x = 1; x < width - 1; ++x){
-        for(int y = 1; y < height - 1; ++y){
-            QRgb color = buffer[x + y * width];
-            color = (color << 16) | (color << 8) | color;
-            resultImage.setPixel(x, y, color);
-        }
-    }
-    return resultImage;
-}
-
 float ImageUtil::toFloatValue(QRgb bright){
     int red = (bright >> 16) & 0xFF;
     int green = (bright >> 8) & 0xFF;
@@ -35,15 +17,33 @@ float ImageUtil::toFloatValue(QRgb bright){
     return ((float)raw) / MAX_INTENSITY;
 }
 
-QImage ImageUtil::downscale(QImage &image, int level){
-    int value = 1 << level;
-    int width2 = image.width() / value;
-    int height2 = image.height() / value;
-    QImage result(width2, height2, image.format());
-    for(int x = 0; x < width2; ++x) {
-        for(int y = 0; y < height2; ++y) {
-            result.setPixel(x, y, image.pixel(x * value, y * value));
+QPixmap ImageUtil::toGrayscale(QPixmap pixmap){
+    QImage image = pixmap.toImage();
+    const QImage grayscale = image.convertToFormat(QImage::Format_Grayscale8);
+    return QPixmap::fromImage(grayscale);
+}
+
+QImage ImageUtil::toImage(QRgb *buffer, int size, int height){
+    QImage resultImage(size, height, QImage::Format_RGB32);
+    for (int x = 1; x < size - 1; ++x){
+        for(int y = 1; y < height - 1; ++y){
+            QRgb color = buffer[x + y * size];
+            color = (color << 16) | (color << 8) | color;
+            resultImage.setPixel(x, y, color);
         }
     }
-    return result;
+    return resultImage;
+}
+
+int ImageUtil::handleEdgeEffect(int value, int size, EdgeType type) {
+    switch(type){
+        case EdgeType_COPY_EDGES:
+            return value < 0 ? 0 : value >= size ? size - 1 : value;
+        case EdgeType_WRAP_EDGES:
+            return value < 0 ? value += size : value >= size ? value -=size : value;
+        case EdgeType_MIRROR_EDGES:
+            return value < 0 ? -value : value >= size ? 2 * size - value : value;
+
+    }
+    return value < 0 ? 0 : value >= size ? 0 : value;
 }

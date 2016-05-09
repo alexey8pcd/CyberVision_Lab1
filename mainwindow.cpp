@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "QtGui"
-#include "QFileDialog"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -80,25 +79,59 @@ void MainWindow::on_bGauss_clicked(){
 
         Kernel * yKernel = Kernel::createGaussSeparateKernelY(sigma);
         FImage resultY = Convolution::apply(resultX, *yKernel, type);
-
+        delete xKernel;
+        delete yKernel;
         resultY.normalize();
         ui->label->setPixmap(QPixmap::fromImage(resultY.toQImage()));
     } else {
         Kernel * gaussKernel = Kernel::createGaussKernel(sigma);
         FImage result = Convolution::apply(image, *gaussKernel, type);
+        delete gaussKernel;
         result.normalize();
         ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
     }
-
 }
 
 void MainWindow::on_bOctaves_clicked() {
-//    double sigma = ui->dsStartSigma->value();
-//    int octavesCount = ui->spOctavesCount->value();
-//    int levelPerOctave = ui->spLevelPerOctave->value();
-//    if(handler != NULL){
-//        PyramidBuilder builder(octavesCount, levelPerOctave, sigma);
-//        QImage image = handler->getImage();
-//        builder.createOctaves(image);
-//    }
+    double sigma = ui->dsStartSigma->value();
+    EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
+    FImage image(original);
+    int octavesCount = ui->spOctavesCount->value();
+    int levelPerOctave = ui->spLevelPerOctave->value();
+    PyramidBuilder builder(octavesCount, levelPerOctave, sigma);
+    builder.createOctaves(image, type);
+
+}
+
+void MainWindow::on_bMoravec_clicked() {
+    EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
+    float threshold = (float)ui->sliderThreshold->value() / 1000.;
+    FImage image(original);
+    InterestPointsDetector detector(image, type);
+    QVector<InterestPointsDetector::InterestPoint*> *points
+            = detector.detectMoravec(threshold);
+    QImage copy(original);
+    for(int i = 0; i < points->size(); ++i) {
+        InterestPointsDetector::InterestPoint * point = points->at(i);
+        for(int x = -1; x < 1; ++x) {
+            for (int y = -1; y < 1; ++y) {
+                int px = ImageUtil::handleEdgeEffect(
+                             point->x + x, image.getWidth(), type);
+                int py = ImageUtil::handleEdgeEffect(
+                             point->y + y, image.getHeight(), type);
+                copy.setPixel(px, py, 0xFFFF0000);
+            }
+        }
+    }
+    delete points;
+    ui->label->setPixmap(QPixmap::fromImage(copy));
+}
+
+void MainWindow::on_sliderThreshold_valueChanged(int value) {
+    float threshold = (float)value / 1000.;
+    ui->lThresholdValue->setText(QString::asprintf("%2.3f", threshold));
+}
+
+void MainWindow::on_bHarris_clicked() {
+
 }

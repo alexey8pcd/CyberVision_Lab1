@@ -13,11 +13,11 @@ public:
     FImage(QImage &image);
     FImage(int width, int height);
     FImage(float * buffer, int width, int height);
-//    FImage(FImage &toCopy);
     FImage();
     ~FImage();
     QImage toQImage();
     void normalize();
+    FImage downscale(int level);
     float * getBuffer();
     int getWidth();
     int getHeight();

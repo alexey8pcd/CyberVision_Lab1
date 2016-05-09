@@ -9,7 +9,6 @@ FImage::FImage(){
 }
 
 FImage::~FImage(){
-    delete buffer;
 }
 
 QImage FImage::toQImage(){
@@ -37,12 +36,19 @@ void FImage::normalize() {
     }
 }
 
-//FImage::FImage(FImage &toCopy){
-//    this->buffer = toCopy.buffer;
-//    this->width = toCopy.width;
-//    this->height = toCopy.height;
-//    this->length = width * height;
-//}
+FImage FImage::downscale(int level)
+{
+    int value = 1 << level;
+    int width2 = width / value;
+    int height2 = height / value;
+    FImage image(width2, height2);
+    for(int x = 0; x < width2; ++x) {
+        for(int y = 0; y < height2; ++y) {
+            image.setValue(x, y, getValue(x * value, y * value));
+        }
+    }
+    return image;
+}
 
 FImage::FImage(float *buffer, int width, int height){
     this->buffer = buffer;

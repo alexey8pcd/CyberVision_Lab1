@@ -33,6 +33,8 @@ class MainWindow : public QMainWindow
 
         void on_sliderThreshold_valueChanged(int value);
 
+        void on_bHarris_clicked();
+        
     private:
         QImage original;
         Ui::MainWindow *ui;
