@@ -3,7 +3,7 @@
 
 #include "QtGui"
 #include "qimage.h"
-#include "edgetype.h"
+#include "datatypes.h"
 class ImageUtil {
     public:        
         static const int MAX_INTENSITY = 255;

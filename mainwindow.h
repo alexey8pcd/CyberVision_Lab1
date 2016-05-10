@@ -6,6 +6,7 @@
 #include "QFileDialog"
 #include "pyramid.h"
 #include "interestpointsdetector.h"
+#include "datatypes.h"
 #include <algorithm>
 
 namespace Ui {
@@ -32,6 +33,10 @@ class MainWindow : public QMainWindow
         void on_bMoravec_clicked();
 
         void on_sliderThreshold_valueChanged(int value);
+
+        void on_bHarris_clicked();
+
+        void on_chbFilter_clicked();
 
     private:
         QImage original;

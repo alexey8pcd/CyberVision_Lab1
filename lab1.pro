@@ -29,6 +29,6 @@ HEADERS  += mainwindow.h \
     kernel.h \
     fimage.h \
     interestpointsdetector.h \
-    edgetype.h
+    datatypes.h
 
 FORMS    += mainwindow.ui

@@ -17,12 +17,14 @@ public:
     int getHeight();
     float *getValues();
     float getValue(int i, int j);
-    static Kernel * createGaussKernel(double sigma);
-    static Kernel * createGaussSeparateKernelX(double sigma);
-    static Kernel * createGaussSeparateKernelY(double sigma);
     Kernel();
     Kernel(float * values, int width, int height);
     Kernel(float * values, int radius);
+    ~Kernel();
+
+    static Kernel * createGaussKernel(double sigma);
+    static Kernel * createGaussSeparateKernelX(double sigma);
+    static Kernel * createGaussSeparateKernelY(double sigma);
 };
 
 #endif // KERNEL_H

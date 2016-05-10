@@ -20,21 +20,25 @@ void MainWindow::on_bLoadImage_clicked() {
 
 void MainWindow::on_bSobelX_clicked() {
     EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
-    float sobelXValues[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 2};
-    Kernel sobelX(sobelXValues, 3);
     FImage image(original);
+
+    float values[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    Kernel sobelX(values, 3);
     FImage result = Convolution::apply(image, sobelX, type);
     result.normalize();
+
     ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
 }
 
 void MainWindow::on_bSobelY_clicked() {
     EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
+    FImage image(original);
+
     float sobelYValues[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
     Kernel sobelY(sobelYValues, 3);
-    FImage image(original);
     FImage result = Convolution::apply(image, sobelY, type);
     result.normalize();
+
     ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
 }
 
@@ -42,8 +46,8 @@ void MainWindow::on_bSobelXY_clicked() {
     EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
     FImage image(original);
 
-    float sobelXValues[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 2};
-    Kernel sobelX(sobelXValues, 3);
+    float values[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    Kernel sobelX(values, 3);
     FImage resultX = Convolution::apply(image, sobelX, type);
     resultX.normalize();
 
@@ -76,10 +80,10 @@ void MainWindow::on_bGauss_clicked(){
     if(ui->chbSeparable->isChecked()){
         Kernel * xKernel = Kernel::createGaussSeparateKernelX(sigma);
         FImage resultX = Convolution::apply(image, *xKernel, type);
+        delete xKernel;
 
         Kernel * yKernel = Kernel::createGaussSeparateKernelY(sigma);
         FImage resultY = Convolution::apply(resultX, *yKernel, type);
-        delete xKernel;
         delete yKernel;
         resultY.normalize();
         ui->label->setPixmap(QPixmap::fromImage(resultY.toQImage()));
@@ -108,11 +112,14 @@ void MainWindow::on_bMoravec_clicked() {
     float threshold = (float)ui->sliderThreshold->value() / 1000.;
     FImage image(original);
     InterestPointsDetector detector(image, type);
-    QVector<InterestPointsDetector::InterestPoint*> *points
+    if(ui->chbFilter->isChecked()){
+        detector.enableFilter(ui->spinInterestPointsCount->value());
+    }
+    QVector<InterestPoint*> *points
             = detector.detectMoravec(threshold);
     QImage copy(original);
     for(int i = 0; i < points->size(); ++i) {
-        InterestPointsDetector::InterestPoint * point = points->at(i);
+        InterestPoint * point = points->at(i);
         for(int x = -1; x < 1; ++x) {
             for (int y = -1; y < 1; ++y) {
                 int px = ImageUtil::handleEdgeEffect(
@@ -133,5 +140,32 @@ void MainWindow::on_sliderThreshold_valueChanged(int value) {
 }
 
 void MainWindow::on_bHarris_clicked() {
+    EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
+    float threshold = (float)ui->sliderThreshold->value() / 1000.;
+    FImage image(original);
+    InterestPointsDetector detector(image, type);
+    if(ui->chbFilter->isChecked()){
+        detector.enableFilter(ui->spinInterestPointsCount->value());
+    }
+    QVector<InterestPoint*> *points
+            = detector.detectHarris(threshold);
+    QImage copy(original);
+    for(int i = 0; i < points->size(); ++i) {
+        InterestPoint * point = points->at(i);
+        for(int x = -1; x < 1; ++x) {
+            for (int y = -1; y < 1; ++y) {
+                int px = ImageUtil::handleEdgeEffect(
+                             point->x + x, image.getWidth(), type);
+                int py = ImageUtil::handleEdgeEffect(
+                             point->y + y, image.getHeight(), type);
+                copy.setPixel(px, py, 0xFFFF0000);
+            }
+        }
+    }
+    ui->label->setPixmap(QPixmap::fromImage(copy));
+    delete points;
+}
+
+void MainWindow::on_chbFilter_clicked() {
 
 }

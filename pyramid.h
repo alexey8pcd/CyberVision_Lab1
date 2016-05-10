@@ -5,7 +5,7 @@
 #include "qimage.h"
 #include "convolution.h"
 #include "qdebug.h"
-#include "edgetype.h"
+#include "datatypes.h"
 
 class PyramidBuilder
 {

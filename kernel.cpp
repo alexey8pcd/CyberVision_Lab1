@@ -56,7 +56,7 @@ Kernel *Kernel::createGaussSeparateKernelX(double sigma) {
     return new Kernel(values, width, 1);
 }
 
-Kernel *Kernel::createGaussSeparateKernelY(double sigma) {
+Kernel* Kernel::createGaussSeparateKernelY(double sigma) {
     Kernel * xKernel = createGaussSeparateKernelX(sigma);
     xKernel->setHeight(xKernel->getWidth());
     xKernel->setWidth(1);
@@ -78,5 +78,9 @@ Kernel::Kernel(float *values, int radius) {
     this->values = values;
     this->width = radius;
     this->heigth = radius;
+}
+
+Kernel::~Kernel() {
+
 }
 
