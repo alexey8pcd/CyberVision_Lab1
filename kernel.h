@@ -1,7 +1,6 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 #include "math.h"
-
 class Kernel
 {
 private:
@@ -22,9 +21,11 @@ public:
     Kernel(float * values, int radius);
     ~Kernel();
 
-    static Kernel * createGaussKernel(double sigma);
-    static Kernel * createGaussSeparateKernelX(double sigma);
-    static Kernel * createGaussSeparateKernelY(double sigma);
+    static Kernel createGaussKernel(double sigma);
+    static Kernel createGaussSeparateKernelX(double sigma);
+    static Kernel createGaussSeparateKernelY(double sigma);
+    static Kernel createSobelKernelX();
+    static Kernel createSobelKernelY();
 };
 
 #endif // KERNEL_H

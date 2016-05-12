@@ -14,14 +14,14 @@ void InterestPointsDetector::disableFilter() {
 }
 
 InterestPointsDetector::InterestPointsDetector(
-        FImage& image, EdgeType type, int radiusOfNeighborhood) {
+        FImage &image, EdgeType type, int radiusOfNeighborhood) {
     this->filterRequired = false;
     this->source = image;
     this->type = type;
     this->radiusOfNeighborhood = radiusOfNeighborhood;
 }
 
-QVector<InterestPoint*>* InterestPointsDetector::detectHarris(float threshold) {
+QVector<InterestPoint*> InterestPointsDetector::detectHarris(float threshold) {
     float values[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
     Kernel sobelX(values, 3);
     FImage derXStore = Convolution::apply(source, sobelX, type);
@@ -64,13 +64,13 @@ QVector<InterestPoint*>* InterestPointsDetector::detectHarris(float threshold) {
     return determineInterestPoints(minValuesStore, threshold);
 }
 
-QVector<InterestPoint*>* InterestPointsDetector::determinePointsByRadius(
+QVector<InterestPoint*> InterestPointsDetector::determinePointsByRadius(
         float threshold, int radius, FImage &minValuesStore)
 {
     int width = minValuesStore.getWidth();
     int height = minValuesStore.getHeight();
 
-    QVector<InterestPoint*>* points = new QVector<InterestPoint*>();
+    QVector<InterestPoint*> points = QVector<InterestPoint*>();
     for (int x = 0; x < width; ++x) {
         for (int y = 0; y < height; ++y) {
             float localMax = minValuesStore.getValue(x, y);
@@ -90,22 +90,21 @@ QVector<InterestPoint*>* InterestPointsDetector::determinePointsByRadius(
                     }
                 }
             }
-            points->push_back(new InterestPoint(x, y, localMax));
-endFor: ;
+            points.push_back(new InterestPoint(x, y, localMax));
+            endFor: ;
         }
     }
     return points;
 }
 
-QVector<InterestPoint*>* InterestPointsDetector::determineInterestPoints(
+QVector<InterestPoint*> InterestPointsDetector::determineInterestPoints(
         FImage &minValuesStore, float threshold) {
-    QVector<InterestPoint*>* points = determinePointsByRadius(
+    QVector<InterestPoint*> points = determinePointsByRadius(
                              threshold, radiusOfNeighborhood, minValuesStore);
     if(filterRequired){
-        if (points->size() > maxPointsCount) {
+        if (points.size() > maxPointsCount) {
             int radius = radiusOfNeighborhood + 1;
-            while (points->size() > maxPointsCount) {
-                delete points;
+            while (points.size() > maxPointsCount) {
                 points = determinePointsByRadius(
                              threshold, radius++, minValuesStore);
             }
@@ -114,7 +113,7 @@ QVector<InterestPoint*>* InterestPointsDetector::determineInterestPoints(
     return points;
 }
 
-QVector<InterestPoint*>* InterestPointsDetector::detectMoravec(float threshold) {
+QVector<InterestPoint*> InterestPointsDetector::detectMoravec(float threshold) {
     int width = source.getWidth();
     int height = source.getHeight();
     FImage minValuesStore(width, height);

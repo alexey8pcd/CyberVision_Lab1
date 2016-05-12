@@ -21,13 +21,11 @@ void PyramidBuilder::createOctaves(FImage &image, EdgeType type){
             double sigmaNext = sigmaAlpha * pow(k, l++);
             qInfo() << "Octave: " << (i + 1) << ", Level: "
                     << (j + 1) << ", Sigma: " << sigmaNext;
-            Kernel * kernelX = Kernel::createGaussSeparateKernelX(sigmaNext);
-            FImage imgX = Convolution::apply(image, *kernelX, type);
-            Kernel * kernelY = Kernel::createGaussSeparateKernelY(sigmaNext);
-            FImage imgY = Convolution::apply(imgX, *kernelY, type);
+            Kernel kernelX = Kernel::createGaussSeparateKernelX(sigmaNext);
+            FImage imgX = Convolution::apply(image, kernelX, type);
+            Kernel kernelY = Kernel::createGaussSeparateKernelY(sigmaNext);
+            FImage imgY = Convolution::apply(imgX, kernelY, type);
             imgY.normalize();
-            delete kernelX;
-            delete kernelY;
             if(scale > 1){
                 FImage img = imgY.downscale(scale);
                 QImage result = img.toQImage();

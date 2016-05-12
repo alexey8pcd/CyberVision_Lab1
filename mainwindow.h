@@ -7,7 +7,9 @@
 #include "pyramid.h"
 #include "interestpointsdetector.h"
 #include "datatypes.h"
-#include <algorithm>
+#include "descriptor.h"
+#include "descriptorsearcher.h"
+using namespace std;
 
 namespace Ui {
     class MainWindow;
@@ -29,17 +31,16 @@ class MainWindow : public QMainWindow
         void on_sliderRadius_valueChanged(int value);
         void on_bGauss_clicked();
         void on_bOctaves_clicked();
-
         void on_bMoravec_clicked();
-
         void on_sliderThreshold_valueChanged(int value);
-
         void on_bHarris_clicked();
-
-        void on_chbFilter_clicked();
+        void on_bLoadImg2_clicked();
+        void on_bSearchDescriptors_clicked();
 
     private:
         QImage original;
+        QImage img2;
+        QImage nullImage = QImage();
         Ui::MainWindow *ui;
 };
 

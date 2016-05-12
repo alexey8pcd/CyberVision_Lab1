@@ -20,7 +20,10 @@ SOURCES += main.cpp\
     pyramid.cpp \
     kernel.cpp \
     fimage.cpp \
-    interestpointsdetector.cpp
+    interestpointsdetector.cpp \
+    histogram.cpp \
+    descriptor.cpp \
+    descriptorsearcher.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
@@ -29,6 +32,9 @@ HEADERS  += mainwindow.h \
     kernel.h \
     fimage.h \
     interestpointsdetector.h \
-    datatypes.h
+    datatypes.h \
+    histogram.h \
+    descriptor.h \
+    descriptorsearcher.h
 
 FORMS    += mainwindow.ui

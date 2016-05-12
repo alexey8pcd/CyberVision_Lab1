@@ -14,10 +14,10 @@ class InterestPointsDetector
         bool filterRequired;
         float calculateOperatorValue(int x, int y);
         float calculateContrastForShift(int x, int y, int dx, int dy);
-        QVector<InterestPoint*>* determineInterestPoints(
+        QVector<InterestPoint*> determineInterestPoints(
                 FImage &minValuesStore, float threshold);
 
-        QVector<InterestPoint*>* determinePointsByRadius(
+        QVector<InterestPoint*> determinePointsByRadius(
                 float threshold, int radius, FImage &minValuesStore);
 
     public:
@@ -26,7 +26,7 @@ class InterestPointsDetector
         void disableFilter();
         InterestPointsDetector(FImage &image, EdgeType type,
                 int radiusOfNeighborhood = 1);
-        QVector<InterestPoint*>* detectMoravec(float threshold = 0.);
-        QVector<InterestPoint*>* detectHarris(float threshold = 0.);
+        QVector<InterestPoint*> detectMoravec(float threshold = 0.);
+        QVector<InterestPoint*> detectHarris(float threshold = 0.);
 };
 #endif // INTERESTPOINTSDETECTOR_H
