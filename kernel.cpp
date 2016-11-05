@@ -8,25 +8,19 @@ void Kernel::setHeight(int value) {
     this->heigth = value;
 }
 
-void Kernel::setValues(float *values, int radius) {
-    this->values = values;
-    this->width = radius;
-    this->heigth = radius;
-}
-
-int Kernel::getWidth() {
+int Kernel::getWidth() const {
     return width;
 }
 
-int Kernel::getHeight() {
+int Kernel::getHeight() const {
     return heigth;
 }
 
 float *Kernel::getValues() {
-    return values;
+    return values.get();
 }
 
-float Kernel::getValue(int i, int j) {
+float Kernel::getValue(int i, int j) const {
     return values[i + width * j];
 }
 
@@ -35,13 +29,13 @@ Kernel Kernel::createGaussKernel(double sigma) {
     const double alpha = 1 / (s2 * 3.141592);
     int radius = (int)(sigma * 3);
     int size = 2 * radius + 1;
-    float * values = new float[size * size];
+    Kernel kernel(size);
     for(int i = -radius, x = 0; i <= radius; ++i, ++x) {
         for(int j = -radius, y = 0; j <= radius; ++j, ++y) {
-            values[x + size * y] = (alpha * exp(-((float)i * i + j * j) / s2));
+            kernel.values[x + size * y]
+                    = (alpha * exp(-((float)i * i + j * j) / s2));
         }
     }
-    Kernel kernel(values, size);
     return kernel;
 }
 
@@ -50,58 +44,91 @@ Kernel Kernel::createGaussSeparateKernelX(double sigma) {
     const double alpha = 1 / (sigma * sqrt(3.141592 * 2));
     int halfWidth = (int)(sigma * 3);
     int width = 2 * halfWidth + 1;
-    float * values = new float[width];
-    for (int i = -halfWidth, x = 0; i <= halfWidth; ++i, ++x) {
-        values[x] = (alpha * exp(-(float)i * i / s2));
+    Kernel kernel(width, 1);
+    if(width == 1){
+        kernel.values[0] = 1;
+    }else{
+        for (int i = -halfWidth, x = 0; i <= halfWidth; ++i, ++x) {
+            kernel.values[x] = (alpha * exp(-(float)i * i / s2));
+        }
     }
-    Kernel kernel(values, width, 1);
+
     return kernel;
 }
 
 Kernel Kernel::createGaussSeparateKernelY(double sigma) {
-    Kernel xKernel = createGaussSeparateKernelX(sigma);
+    Kernel&& xKernel = createGaussSeparateKernelX(sigma);
     xKernel.setHeight(xKernel.getWidth());
     xKernel.setWidth(1);
     return xKernel;
 }
 
 Kernel Kernel::createSobelKernelX() {
-    float sobelXValues[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
-    float * values = new float[9];
+    float sobelXValues[] = {-1, 0, 1,
+                            -2, 0, 2,
+                            -1, 0, 1};
+    Kernel kernel(3);
     for (int i = 0; i < 9; ++i) {
-        values[i] = sobelXValues[i];
-    }
-    Kernel kernel(values, 3);
+        kernel.values[i] = sobelXValues[i];
+    }    
     return kernel;
 }
 
 Kernel Kernel::createSobelKernelY() {
-    float sobelYValues[] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
-    float * values = new float[9];
+    float sobelYValues[] = {-1, -2, -1,
+                            0, 0, 0,
+                            1, 2, 1};
+    Kernel kernel(3);
     for (int i = 0; i < 9; ++i) {
-        values[i] = sobelYValues[i];
+        kernel.values[i] = sobelYValues[i];
     }
-    Kernel kernel(values, 3);
     return kernel;
 }
 
-Kernel::Kernel() {
-    this->values = new float[0];
-    this->width = 0;
-}
-
-Kernel::Kernel(float *values, int width, int height) {
-    this->values = values;
-    this->width = width;
-    this->heigth = height;
-}
-
-Kernel::Kernel(float *values, int radius) {
-    this->values = values;
+Kernel::Kernel(int radius) {
+    if(radius < 0){
+        radius = 0;
+    }
+    this->values = unique_ptr<float[]>(new float[radius * radius]);
     this->width = radius;
     this->heigth = radius;
 }
 
+Kernel::Kernel(Kernel &&kernel){
+    this->width = kernel.width;
+    this->heigth = kernel.heigth;
+    this->values = move(kernel.values);
+}
+
+Kernel::Kernel(const Kernel& kernel){
+    this->width = kernel.width;
+    this->heigth = kernel.heigth;
+    this->values = unique_ptr<float[]>(new float[width * heigth]);
+    int size = width * heigth;
+    for (int i = 0; i < size; ++i) {
+        values[i] = kernel.values[i];
+    }
+}
+
+Kernel::Kernel(int width, int height) {
+    if(width < 0){
+        width = 0;
+    }
+    if(height < 0){
+        height = 0;
+    }
+    this->values = unique_ptr<float[]>(new float[width * height]);
+    this->width = width;
+    this->heigth = height;
+}
+
+Kernel::Kernel(){
+    this->width = 0;
+    this->heigth = 0;
+    this->values = unique_ptr<float[]>(new float[0]);
+}
+
 Kernel::~Kernel() {
+
 }
 

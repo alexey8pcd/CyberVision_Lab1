@@ -1,5 +1,10 @@
 #include "imageutil.h"
 
+bool ImageUtil::insideImage(int xIndex, int yIndex){
+    return xIndex != OUTSIDE_PIXEL_ADDRESS
+                     && yIndex != OUTSIDE_PIXEL_ADDRESS;
+}
+
 QRgb ImageUtil::toQRgb(float value){
     QRgb bright = (QRgb) (value * MAX_INTENSITY) & 0xFF;
     int red = bright << 16;
@@ -18,8 +23,8 @@ float ImageUtil::toFloatValue(QRgb bright){
 }
 
 QPixmap ImageUtil::toGrayscale(QPixmap pixmap){
-    QImage image = pixmap.toImage();
-    const QImage grayscale = image.convertToFormat(QImage::Format_Grayscale8);
+    QImage&& image = pixmap.toImage();
+    const QImage& grayscale = image.convertToFormat(QImage::Format_Grayscale8);
     return QPixmap::fromImage(grayscale);
 }
 
@@ -40,10 +45,13 @@ int ImageUtil::handleEdgeEffect(int value, int size, EdgeType type) {
         case EdgeType_COPY_EDGES:
             return value < 0 ? 0 : value >= size ? size - 1 : value;
         case EdgeType_WRAP_EDGES:
-            return value < 0 ? value += size : value >= size ? value -=size : value;
+            return value < 0 ? value += size : value >= size
+                                        ? value -=size : value;
         case EdgeType_MIRROR_EDGES:
-            return value < 0 ? -value : value >= size ? 2 * size - value : value;
-
+            return value < 0 ? -value : value >= size
+                               ? 2 * size - value - 1 : value;
+        default:
+            return value < 0 ? OUTSIDE_PIXEL_ADDRESS : value >= size
+                               ? OUTSIDE_PIXEL_ADDRESS : value;
     }
-    return value < 0 ? 0 : value >= size ? 0 : value;
 }

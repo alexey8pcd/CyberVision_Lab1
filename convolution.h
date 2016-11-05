@@ -10,12 +10,14 @@
 class Convolution
 {
     public:
-        Convolution();
-        static FImage apply(FImage &image, Kernel &kernel,
-                            EdgeType edgesType);
+        Convolution(Kernel &kernel, EdgeType edgesType){
+            this->kernel = std::move(kernel);
+            this->edgeType = edgesType;
+        }
+        FImage apply(const FImage &image);
     private:
-        static float applyToPixel(FImage &image, int x, int y,
-                           Kernel &kernel, EdgeType edgesType);
+        Kernel kernel;
+        EdgeType edgeType;
 };
 
 #endif // CONVULSION_H

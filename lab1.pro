@@ -7,7 +7,8 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
+QMAKE_CXXFLAGS += -std=c++14
+CONFIG += c++14
 TARGET = lab1
 TEMPLATE = app
 
@@ -17,24 +18,23 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     convolution.cpp \
     imageutil.cpp \
-    pyramid.cpp \
     kernel.cpp \
     fimage.cpp \
     interestpointsdetector.cpp \
-    histogram.cpp \
-    descriptor.cpp \
-    descriptorsearcher.cpp
+    siftdescriptorssearcher.cpp \
+    descriptorsmatcher.cpp \
+    pyramidbuilder.cpp
 
 HEADERS  += mainwindow.h \
     imageutil.h \
     convolution.h \
-    pyramid.h \
     kernel.h \
     fimage.h \
     interestpointsdetector.h \
     datatypes.h \
-    histogram.h \
     descriptor.h \
-    descriptorsearcher.h
+    siftdescriptorssearcher.h \
+    descriptorsmatcher.h \
+    pyramidbuilder.h
 
 FORMS    += mainwindow.ui

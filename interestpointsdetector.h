@@ -4,6 +4,8 @@
 #include "imageutil.h"
 #include "convolution.h"
 #include "datatypes.h"
+#include "vector"
+using namespace std;
 class InterestPointsDetector
 {
     private:
@@ -14,19 +16,25 @@ class InterestPointsDetector
         bool filterRequired;
         float calculateOperatorValue(int x, int y);
         float calculateContrastForShift(int x, int y, int dx, int dy);
-        QVector<InterestPoint*> determineInterestPoints(
-                FImage &minValuesStore, float threshold);
+        vector<InterestPoint> adaptiveNonMaximumSuppression(
+                const vector<InterestPoint>& points);
 
-        QVector<InterestPoint*> determinePointsByRadius(
-                float threshold, int radius, FImage &minValuesStore);
+        vector<InterestPoint> determinePointsByRadius(
+                float threshold, int radius, const FImage &minValuesStore);
+
+        vector<InterestPoint> filter(int radius,
+            const vector<InterestPoint>& points);
+
+        FImage calculateMinLambdasStore(const FImage& derXStore,
+                                        const FImage& derYStore);
 
     public:
         InterestPointsDetector();
         void enableFilter(int maxPointsCount);
         void disableFilter();
-        InterestPointsDetector(FImage &image, EdgeType type,
+        InterestPointsDetector(const FImage &image, EdgeType type,
                 int radiusOfNeighborhood = 1);
-        QVector<InterestPoint*> detectMoravec(float threshold = 0.);
-        QVector<InterestPoint*> detectHarris(float threshold = 0.);
+        vector<InterestPoint> detectMoravec(float threshold = 0.);
+        vector<InterestPoint> detectHarris(float threshold = 0.);
 };
 #endif // INTERESTPOINTSDETECTOR_H

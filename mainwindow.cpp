@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "QMessageBox"
+#include "siftdescriptorssearcher.h"
+#include "descriptorsmatcher.h"
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -18,7 +21,7 @@ void MainWindow::on_bLoadImage_clicked() {
     QString fileName = QFileDialog::getOpenFileName(this, "Выбрать изображение");
     try {
         this->original = QImage(fileName).convertToFormat(QImage::Format_ARGB32);
-        ui->label->setPixmap(QPixmap::fromImage(original));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(original));
     } catch (...) {
         original = nullImage;
     }
@@ -29,9 +32,10 @@ void MainWindow::on_bSobelX_clicked() {
         EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
         FImage image(original);
         Kernel sobelX = Kernel::createSobelKernelX();
-        FImage result = Convolution::apply(image, sobelX, type);
+        Convolution conv = Convolution(sobelX, type);
+        FImage result = conv.apply(image);
         result.normalize();
-        ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(result.toQImage()));
     }
 }
 
@@ -40,9 +44,10 @@ void MainWindow::on_bSobelY_clicked() {
         EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
         FImage image(original);
         Kernel sobelY = Kernel::createSobelKernelY();
-        FImage result = Convolution::apply(image, sobelY, type);
+        Convolution conv = Convolution(sobelY, type);
+        FImage result = conv.apply(image);
         result.normalize();
-        ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(result.toQImage()));
     }
 }
 
@@ -51,11 +56,13 @@ void MainWindow::on_bSobelXY_clicked() {
         EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
         FImage image(original);
         Kernel sobelX = Kernel::createSobelKernelX();
-        FImage resultX = Convolution::apply(image, sobelX, type);
+        Convolution convX = Convolution(sobelX, type);
+        FImage resultX = convX.apply(image);
         resultX.normalize();
 
         Kernel sobelY = Kernel::createSobelKernelY();
-        FImage resultY = Convolution::apply(image, sobelY, type);
+        Convolution convY = Convolution(sobelY, type);
+        FImage resultY = convY.apply(image);
         resultY.normalize();
 
         FImage result(resultX.getWidth(), resultY.getHeight());
@@ -67,7 +74,7 @@ void MainWindow::on_bSobelXY_clicked() {
             }
         }
         result.normalize();
-        ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(result.toQImage()));
     }
 }
 
@@ -82,30 +89,44 @@ void MainWindow::on_bGauss_clicked(){
         FImage image(original);
         if(ui->chbSeparable->isChecked()){
             Kernel xKernel = Kernel::createGaussSeparateKernelX(sigma);
-            FImage resultX = Convolution::apply(image, xKernel, type);
+            Convolution convX = Convolution(xKernel, type);
+            FImage resultX = convX.apply(image);
 
             Kernel yKernel = Kernel::createGaussSeparateKernelY(sigma);
-            FImage resultY = Convolution::apply(resultX, yKernel, type);
+            Convolution convY = Convolution(yKernel, type);
+            FImage resultY = convY.apply(resultX);
             resultY.normalize();
-            ui->label->setPixmap(QPixmap::fromImage(resultY.toQImage()));
+            ui->imageLabel->setPixmap(QPixmap::fromImage(resultY.toQImage()));
         } else {
             Kernel gaussKernel = Kernel::createGaussKernel(sigma);
-            FImage result = Convolution::apply(image, gaussKernel, type);
+            Convolution conv = Convolution(gaussKernel, type);
+            FImage result = conv.apply(image);
             result.normalize();
-            ui->label->setPixmap(QPixmap::fromImage(result.toQImage()));
+            ui->imageLabel->setPixmap(QPixmap::fromImage(result.toQImage()));
         }
     }
 }
 
 void MainWindow::on_bOctaves_clicked() {
     if(original != nullImage){
-        double sigma = ui->dsStartSigma->value();
+        ui->lState->setText("");
+        double startSigma = ui->dsStartSigma->value();
+        double sigmaAlias = ui->dsSigmaA->value();
+        if(sigmaAlias > startSigma){
+            QMessageBox box;
+            QString text = "Значение параметра сигма начальная";
+            text.append(" не может быть меньше значения сигма сглаженная");
+            box.setText(text);
+            box.exec();
+        }
         EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
         FImage image(original);
-        int octavesCount = ui->spOctavesCount->value();
         int levelPerOctave = ui->spLevelPerOctave->value();
-        PyramidBuilder builder(octavesCount, levelPerOctave, sigma);
-        builder.createOctaves(image, type);
+        PyramidBuilder builder(image, type, levelPerOctave,
+                               sigmaAlias, startSigma);
+        builder.createOctaves();
+        builder.save();
+        ui->lState->setText("Завершено");
     }
 }
 
@@ -114,24 +135,26 @@ void MainWindow::on_bMoravec_clicked() {
         EdgeType type = (EdgeType)ui->cbEdgeTypes->currentIndex();
         float threshold = (float)ui->sliderThreshold->value() / 1000.;
         FImage image(original);
-        InterestPointsDetector detector(image, type);
+        InterestPointsDetector detector(image, type, 2);
         if(ui->chbFilter->isChecked()){
             detector.enableFilter(ui->spinInterestPointsCount->value());
         }
-        QVector<InterestPoint*> points = detector.detectMoravec(threshold);
+        vector<InterestPoint> points = detector.detectMoravec(threshold);
         QImage copy(original);
-        foreach (InterestPoint* point, points) {
+        foreach (const InterestPoint& point, points) {
             for(int x = -1; x < 1; ++x) {
                 for (int y = -1; y < 1; ++y) {
                     int px = ImageUtil::handleEdgeEffect(
-                                 point->x + x, image.getWidth(), type);
+                                 point.x + x, image.getWidth(), type);
                     int py = ImageUtil::handleEdgeEffect(
-                                 point->y + y, image.getHeight(), type);
-                    copy.setPixel(px, py, 0xFFFF0000);
+                                 point.y + y, image.getHeight(), type);
+                    if(ImageUtil::insideImage(px, py)){
+                        copy.setPixel(px, py, 0xFFFF0000);
+                    }
                 }
             }
         }
-        ui->label->setPixmap(QPixmap::fromImage(copy));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(copy));
     }
 }
 
@@ -149,21 +172,22 @@ void MainWindow::on_bHarris_clicked() {
         if(ui->chbFilter->isChecked()){
             detector.enableFilter(ui->spinInterestPointsCount->value());
         }
-        QVector<InterestPoint*> points = detector.detectHarris(threshold);
+        vector<InterestPoint> points = detector.detectHarris(threshold);
         QImage copy(original);
-
-        foreach (InterestPoint* point, points) {
+        foreach (const InterestPoint& point, points) {
             for(int x = -1; x < 1; ++x) {
                 for (int y = -1; y < 1; ++y) {
                     int px = ImageUtil::handleEdgeEffect(
-                                 point->x + x, image.getWidth(), type);
+                                 point.x + x, image.getWidth(), type);
                     int py = ImageUtil::handleEdgeEffect(
-                                 point->y + y, image.getHeight(), type);
-                    copy.setPixel(px, py, 0xFFFF0000);
+                                 point.y + y, image.getHeight(), type);
+                    if(ImageUtil::insideImage(px, py)){
+                        copy.setPixel(px, py, 0xFFFF0000);
+                    }
                 }
             }
         }
-        ui->label->setPixmap(QPixmap::fromImage(copy));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(copy));
     }
 }
 
@@ -178,7 +202,7 @@ void MainWindow::on_bLoadImg2_clicked() {
         QPainter painter(result);
         painter.drawImage(0, 0, original);
         painter.drawImage(original.width(), 0, img2);
-        ui->label->setPixmap(QPixmap::fromImage(*result));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(*result));
     }
 }
 
@@ -193,16 +217,19 @@ void MainWindow::on_bSearchDescriptors_clicked() {
         detector1.enableFilter(ui->spinMaxDescSize->value());
         detector2.enableFilter(ui->spinMaxDescSize->value());
         const double sigma = ui->sliderRadius->value();
-        QVector<InterestPoint*> points1 = detector1.detectHarris(threshold);
-        QVector<InterestPoint*> points2 = detector2.detectHarris(threshold);
-        QVector<Descriptor*> descriptors1 = DescriptorSearcher::search(image1,
+        vector<InterestPoint> points1 = detector1.detectHarris(threshold);
+        vector<InterestPoint> points2 = detector2.detectHarris(threshold);
+
+        vector<Descriptor<SIFT_DESC_SIZE>> descriptors1
+                = search(image1,
                     points1, type, ui->chbGaussSmooth->isChecked(), sigma);
 
-        QVector<Descriptor*> descriptors2 = DescriptorSearcher::search(image2,
+        vector<Descriptor<SIFT_DESC_SIZE>> descriptors2 = search(image2,
                     points2, type, ui->chbGaussSmooth->isChecked(), sigma);
 
-        QVector<QPair<Descriptor*, Descriptor*>*> pairs =
-                DescriptorSearcher::associate(descriptors1, descriptors2);
+        vector<pair<Descriptor<SIFT_DESC_SIZE>,
+                Descriptor<SIFT_DESC_SIZE>>> pairs =
+                associate(descriptors1, descriptors2);
         int height = original.height() > img2.height()
                      ? original.height() : img2.height();
         QImage* result = new QImage(original.width() + img2.width(), height,
@@ -212,17 +239,18 @@ void MainWindow::on_bSearchDescriptors_clicked() {
         painter.drawImage(original.width(), 0, img2);        
         for (int i = 0; i < pairs.size(); ++i) {
             QColor color = QColor((5 * i) % 256,
-                                  (10 * i) % 256,
-                                  (128 + 22 * i) % 256);
+                                  (11 * i) % 256,
+                                  (128 + 23 * i) % 256);
             painter.setPen(color);
-            QPair<Descriptor*, Descriptor*>* pair = pairs.at(i);
-            Descriptor* d1 = pair->first;
-            Descriptor* d2 = pair->second;
-            painter.drawRect(d1->getX(), d1->getY(), 3, 3);
-            painter.drawRect(d2->getX() + img2.width(), d2->getY(), 3, 3);
-            painter.drawLine(d1->getX(), d1->getY(),
-                             d2->getX() + img2.width(), d2->getY());
+            pair<Descriptor<SIFT_DESC_SIZE>,
+                    Descriptor<SIFT_DESC_SIZE>> p= pairs.at(i);
+            const Descriptor<SIFT_DESC_SIZE> d1 = p.first;
+            const Descriptor<SIFT_DESC_SIZE> d2 = p.second;
+            painter.drawRect(d1.getX(), d1.getY(), 3, 3);
+            painter.drawRect(d2.getX() + img2.width(), d2.getY(), 3, 3);
+            painter.drawLine(d1.getX(), d1.getY(),
+                             d2.getX() + img2.width(), d2.getY());
         }
-        ui->label->setPixmap(QPixmap::fromImage(*result));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(*result));
     }
 }

@@ -4,11 +4,11 @@
 #include <QMainWindow>
 #include "QtGui"
 #include "QFileDialog"
-#include "pyramid.h"
+#include "pyramidbuilder.h"
 #include "interestpointsdetector.h"
 #include "datatypes.h"
 #include "descriptor.h"
-#include "descriptorsearcher.h"
+
 using namespace std;
 
 namespace Ui {

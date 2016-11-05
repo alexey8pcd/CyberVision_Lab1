@@ -1,24 +1,34 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 #include "math.h"
+#include "QtCore"
+#include "memory"
+using namespace std;
 class Kernel
 {
 private:
     int width;
     int heigth;
-    float * values;
+    unique_ptr<float[]> values;
     void setWidth(int value);
     void setHeight(int value);
 public:
-    void setValues(float * values, int width, int height);
-    void setValues(float * values, int radius);
-    int getWidth();
-    int getHeight();
+    int getWidth() const;
+    int getHeight() const;
     float *getValues();
-    float getValue(int i, int j);
+    float getValue(int i, int j) const;
     Kernel();
-    Kernel(float * values, int width, int height);
-    Kernel(float * values, int radius);
+    Kernel(int radius);
+    Kernel(int width, int height);
+    Kernel(const Kernel &kernel);
+    Kernel(Kernel &&kernel);
+    Kernel& operator=(Kernel &&kernel){
+        this->width = kernel.width;
+        this->heigth = kernel.heigth;
+        values = move(kernel.values);
+        return *this;
+    }
+
     ~Kernel();
 
     static Kernel createGaussKernel(double sigma);
