@@ -216,16 +216,20 @@ void MainWindow::on_bSearchDescriptors_clicked() {
         InterestPointsDetector detector2(image2, type);        
         detector1.enableFilter(ui->spinMaxDescSize->value());
         detector2.enableFilter(ui->spinMaxDescSize->value());
+
         const double sigma = ui->sliderRadius->value();
         vector<InterestPoint> points1 = detector1.detectHarris(threshold);
         vector<InterestPoint> points2 = detector2.detectHarris(threshold);
 
+        bool smoothed = ui->chbGaussSmooth->isChecked();
+        GradientAlgorithm algorithm = ui->rbGradSimple->isChecked()
+                                      ? GradientAlgorithm::SIMPLE
+                                      : GradientAlgorithm::SOBEL;
         vector<Descriptor<SIFT_DESC_SIZE>> descriptors1
-                = search(image1,
-                    points1, type, ui->chbGaussSmooth->isChecked(), sigma);
+                = search(image1, points1, type, algorithm, smoothed, sigma);
 
-        vector<Descriptor<SIFT_DESC_SIZE>> descriptors2 = search(image2,
-                    points2, type, ui->chbGaussSmooth->isChecked(), sigma);
+        vector<Descriptor<SIFT_DESC_SIZE>> descriptors2
+                = search(image2, points2, type, algorithm, smoothed, sigma);
 
         vector<pair<Descriptor<SIFT_DESC_SIZE>,
                 Descriptor<SIFT_DESC_SIZE>>> pairs =

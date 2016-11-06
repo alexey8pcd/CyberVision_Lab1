@@ -1,5 +1,6 @@
 #ifndef DATATYPES
 #define DATATYPES
+#include "QString"
 
 enum EdgeType {
     EdgeType_OUTSIDE_BLACK,
@@ -16,6 +17,11 @@ struct InterestPoint{
         this->x = x;
         this->y = y;
         this->value = value;
+    }
+    QString toQString() const {
+        QString s = QString::number(x);
+        s.append(";").append(QString::number(y));
+        return s;
     }
 };
 

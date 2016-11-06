@@ -20,20 +20,41 @@ float *Kernel::getValues() {
     return values.get();
 }
 
-float Kernel::getValue(int i, int j) const {
+float Kernel::getValueByIndexes(int i, int j) const {
     return values[i + width * j];
+}
+
+float Kernel::getValue(int x, int y) const {
+    x += width / 2;
+    y += heigth / 2;
+    return getValueByIndexes(x, y);
 }
 
 Kernel Kernel::createGaussKernel(double sigma) {
     const double s2 = sigma * sigma * 2;
     const double alpha = 1 / (s2 * 3.141592);
-    int radius = (int)(sigma * 3);
+    int radius = (int)(sigma * 3 + 0.5);
     int size = 2 * radius + 1;
     Kernel kernel(size);
     for(int i = -radius, x = 0; i <= radius; ++i, ++x) {
         for(int j = -radius, y = 0; j <= radius; ++j, ++y) {
-            kernel.values[x + size * y]
-                    = (alpha * exp(-((float)i * i + j * j) / s2));
+            float value = alpha * exp(-((float)i * i + j * j) / s2);
+            kernel.values[x + size * y] = value;
+        }
+    }
+    return kernel;
+}
+
+Kernel Kernel::createGaussKernelByRadius(int radius){
+    int size = 2 * radius + 1;
+    double sigma = (double)radius / 3;
+    const double s2 = sigma * sigma * 2;
+    const double alpha = 1 / (s2 * 3.141592);
+    Kernel kernel(size);
+    for(int i = -radius, x = 0; i <= radius; ++i, ++x) {
+        for(int j = -radius, y = 0; j <= radius; ++j, ++y) {
+            float value = alpha * exp(-((float)i * i + j * j) / s2);
+            kernel.values[x + size * y] = value;
         }
     }
     return kernel;
@@ -85,6 +106,24 @@ Kernel Kernel::createSobelKernelY() {
     return kernel;
 }
 
+Kernel Kernel::createSimpleGradientKernelX()
+{
+    Kernel kernel = Kernel(3, 1);
+    kernel.getValues()[0] = -1;
+    kernel.getValues()[1] = 0;
+    kernel.getValues()[2] = 1;
+    return kernel;
+}
+
+Kernel Kernel::createSimpleGradientKernelY()
+{
+    Kernel kernel = Kernel(1, 3);
+    kernel.getValues()[0] = -1;
+    kernel.getValues()[1] = 0;
+    kernel.getValues()[2] = 1;
+    return kernel;
+}
+
 Kernel::Kernel(int radius) {
     if(radius < 0){
         radius = 0;
@@ -131,4 +170,6 @@ Kernel::Kernel(){
 Kernel::~Kernel() {
 
 }
+
+
 

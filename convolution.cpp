@@ -22,7 +22,7 @@ FImage Convolution::apply(const FImage &image){
                     int yj = ImageUtil::handleEdgeEffect(y + dy, height, edgeType);
                     if(ImageUtil::insideImage(xi, yj)) {
                         float intensity = image.getValue(xi, yj);
-                        result += intensity * kernel.getValue(i, j);
+                        result += intensity * kernel.getValueByIndexes(i, j);
                     }
                 }
             }

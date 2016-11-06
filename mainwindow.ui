@@ -17,7 +17,7 @@
    <widget class="QPushButton" name="bLoadImage">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>520</x>
       <y>460</y>
       <width>121</width>
       <height>23</height>
@@ -46,7 +46,7 @@
    <widget class="QComboBox" name="cbEdgeTypes">
     <property name="geometry">
      <rect>
-      <x>670</x>
+      <x>830</x>
       <y>460</y>
       <width>121</width>
       <height>22</height>
@@ -76,7 +76,7 @@
    <widget class="QLabel" name="lHandleWingEffects">
     <property name="geometry">
      <rect>
-      <x>500</x>
+      <x>660</x>
       <y>460</y>
       <width>171</width>
       <height>16</height>
@@ -91,7 +91,7 @@
      <rect>
       <x>0</x>
       <y>480</y>
-      <width>871</width>
+      <width>1021</width>
       <height>80</height>
      </rect>
     </property>
@@ -100,7 +100,7 @@
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Lab 1</string>
+      <string>Градиенты</string>
      </attribute>
      <widget class="QPushButton" name="bSobelX">
       <property name="geometry">
@@ -144,7 +144,7 @@
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Lab 2</string>
+      <string>Размытие</string>
      </attribute>
      <widget class="QSlider" name="sliderRadius">
       <property name="geometry">
@@ -306,7 +306,7 @@
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Lab 3</string>
+      <string>Интересные точки</string>
      </attribute>
      <widget class="QPushButton" name="bMoravec">
       <property name="geometry">
@@ -411,7 +411,7 @@
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
-      <string>Lab4</string>
+      <string>Дескрипторы</string>
      </attribute>
      <widget class="QPushButton" name="bLoadImg2">
       <property name="geometry">
@@ -478,13 +478,61 @@
        </rect>
       </property>
       <property name="minimum">
-       <number>5</number>
+       <number>20</number>
       </property>
       <property name="maximum">
        <number>500</number>
       </property>
       <property name="value">
-       <number>20</number>
+       <number>100</number>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rbGradSobel">
+      <property name="geometry">
+       <rect>
+        <x>720</x>
+        <y>30</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Собель</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">buttonGroup</string>
+      </attribute>
+     </widget>
+     <widget class="QRadioButton" name="rbGradSimple">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>30</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Простой[-1 0 1]</string>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">buttonGroup</string>
+      </attribute>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>720</x>
+        <y>10</y>
+        <width>181</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Нахождение градиентов</string>
       </property>
      </widget>
     </widget>
@@ -522,4 +570,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

@@ -3,6 +3,7 @@
 #include "math.h"
 #include "QtCore"
 #include "memory"
+#include <iostream>
 using namespace std;
 class Kernel
 {
@@ -16,7 +17,8 @@ public:
     int getWidth() const;
     int getHeight() const;
     float *getValues();
-    float getValue(int i, int j) const;
+    float getValueByIndexes(int rowIndex, int columnIndex) const;
+    float getValue(int x, int y) const;
     Kernel();
     Kernel(int radius);
     Kernel(int width, int height);
@@ -31,11 +33,14 @@ public:
 
     ~Kernel();
 
+    static Kernel createGaussKernelByRadius(int radius);
     static Kernel createGaussKernel(double sigma);
     static Kernel createGaussSeparateKernelX(double sigma);
     static Kernel createGaussSeparateKernelY(double sigma);
     static Kernel createSobelKernelX();
     static Kernel createSobelKernelY();
+    static Kernel createSimpleGradientKernelX();
+    static Kernel createSimpleGradientKernelY();
 };
 
 #endif // KERNEL_H
