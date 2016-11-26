@@ -5,7 +5,13 @@
 #include "convolution.h"
 #include "datatypes.h"
 #include "vector"
+#include "common.h"
+
 using namespace std;
+const int ROTATION_INV_BASKET_COUNT = 36;
+constexpr float R_DPHI = 2 * M_PI / ROTATION_INV_BASKET_COUNT;
+constexpr float R_HALF_DPHI = R_DPHI / 2;
+
 class InterestPointsDetector
 {
     private:
@@ -22,6 +28,8 @@ class InterestPointsDetector
         vector<InterestPoint> determinePointsByRadius(
                 float threshold, int radius, const FImage &minValuesStore);
 
+        vector<InterestPoint> calculateOrientations(const vector<InterestPoint>& points);
+
         vector<InterestPoint> filter(int radius,
             const vector<InterestPoint>& points);
 
@@ -33,7 +41,7 @@ class InterestPointsDetector
         void enableFilter(int maxPointsCount);
         void disableFilter();
         InterestPointsDetector(const FImage &image, EdgeType type,
-                int radiusOfNeighborhood = 1);
+                int radiusOfNeighborhood = 8);
         vector<InterestPoint> detectMoravec(float threshold = 0.);
         vector<InterestPoint> detectHarris(float threshold = 0.);
 };

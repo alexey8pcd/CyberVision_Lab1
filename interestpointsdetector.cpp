@@ -80,7 +80,10 @@ vector<InterestPoint> InterestPointsDetector::detectHarris(float threshold) {
     FImage minLambdasStore = calculateMinLambdasStore(derXStore, derYStore);
     vector<InterestPoint> points = determinePointsByRadius(
                              threshold, radiusOfNeighborhood, minLambdasStore);
-    return adaptiveNonMaximumSuppression(points);
+
+    vector<InterestPoint> mostPowerPoint = adaptiveNonMaximumSuppression(points);
+    vector<InterestPoint> mostPPWithOrientation = calculateOrientations(mostPowerPoint);
+    return mostPPWithOrientation;
 }
 
 vector<InterestPoint> InterestPointsDetector::determinePointsByRadius(
@@ -88,6 +91,7 @@ vector<InterestPoint> InterestPointsDetector::determinePointsByRadius(
 {
     int width = minValuesStore.getWidth();
     int height = minValuesStore.getHeight();
+
     vector<InterestPoint> points = vector<InterestPoint>();
     for (int x = 0; x < width; ++x) {
         for (int y = 0; y < height; ++y) {
@@ -112,16 +116,121 @@ vector<InterestPoint> InterestPointsDetector::determinePointsByRadius(
                         addPoint = false;
                         break;
                     }
-
                 }
             }
             if(addPoint){
-                const InterestPoint point(x, y, localMax);
+                InterestPoint point(x, y, localMax);
                 points.push_back(point);
             }
         }
     }
     return points;
+}
+
+vector<InterestPoint> InterestPointsDetector::calculateOrientations(
+        const vector<InterestPoint>& points) {
+    Kernel gaussKernel = Kernel::createGaussKernelByRadius(radiusOfNeighborhood);
+
+    vector<InterestPoint> result = vector<InterestPoint>();
+    foreach (InterestPoint point, points) {
+        float rBaskets[ROTATION_INV_BASKET_COUNT] = {0.f};
+        //заполнить корзины
+        for (int dx = -radiusOfNeighborhood; dx <= radiusOfNeighborhood; ++dx) {
+            for (int dy = -radiusOfNeighborhood; dy <= radiusOfNeighborhood; ++dy) {
+                int x1 = ImageUtil::handleEdgeEffect(dx + point.x + 1, source.getWidth(), type);
+                int x2 = ImageUtil::handleEdgeEffect(dx + point.x - 1, source.getWidth(), type);
+                int y1 = ImageUtil::handleEdgeEffect(dy + point.y + 1, source.getHeight(), type);
+                int y2 = ImageUtil::handleEdgeEffect(dy + point.y - 1, source.getHeight(), type);
+                int x0 = ImageUtil::handleEdgeEffect(dx + point.x, source.getWidth(), type);
+                int y0 = ImageUtil::handleEdgeEffect(dy + point.y, source.getHeight(), type);
+                if(ImageUtil::insideImage(x1, y0)
+                        && ImageUtil::insideImage(x2, y0)
+                        && ImageUtil::insideImage(x0, y1)
+                        && ImageUtil::insideImage(x0, y2)){
+
+                    float lx1y0 = source.getValue(x1, y0);
+                    float lx2y0 = source.getValue(x2, y0);
+
+                    float lx0y1 = source.getValue(x0, y1);
+                    float lx0y2 = source.getValue(x0, y2);
+
+                    float dlx = lx1y0 - lx2y0;
+                    float dly = lx0y1 - lx0y2;
+                    float gradientLength = sqrtf(dlx * dlx + dly * dly);
+                    float angle = atan2(dly, dlx) + M_PI;
+                    gradientLength *= gaussKernel.getValue(dx, dy);
+
+                    //узнать номер текущей козины
+                    int basketNumber = (int)(angle / R_DPHI);
+                    float mod = angle - basketNumber * R_DPHI;
+
+                    //узнать номер соседней корзины
+                    int basketNumberNei = calculateNumberOfNeighbornBasket(
+                                              R_HALF_DPHI, mod,
+                                              basketNumber, ROTATION_INV_BASKET_COUNT);
+                    //узнать расстояние до центра текущей корзины
+                    float centerOfBasket = basketNumber * R_DPHI + R_HALF_DPHI;
+                    float distanceToCenter = fabs(angle - fabs(centerOfBasket));
+                    float distanceToCenterNei = R_DPHI - distanceToCenter;
+                    float ratio = 1. - distanceToCenter / R_DPHI;
+                    float ratioNei = 1. - distanceToCenterNei / R_DPHI;
+                    rBaskets[basketNumber] += gradientLength * ratio;
+                    rBaskets[basketNumberNei] += gradientLength * ratioNei;
+                }
+
+            }
+        }
+        //найти пики
+        int peakIndex = 0;
+        float peakValue = rBaskets[peakIndex];
+        for (int i = 1; i < ROTATION_INV_BASKET_COUNT; ++i) {
+            if (rBaskets[i] > peakValue) {
+                peakValue = rBaskets[i];
+                peakIndex = i;
+            }
+        }
+        int xL, xR;
+        if (peakIndex == 0){
+            xL = ROTATION_INV_BASKET_COUNT - 1;
+        } else {
+            xL = peakIndex - 1;
+        }
+        if (peakIndex == ROTATION_INV_BASKET_COUNT - 1){
+            xR = 0;
+        } else {
+            xR = peakIndex + 1;
+        }
+        double angleOfPeak = maxInterp3f(rBaskets[xL], peakValue, rBaskets[xR]);
+        point.setOrientation(angleOfPeak);
+        result.push_back(point);
+
+        int subPeakIndex = -1;
+        float subPeakValue = 0.8 * peakValue;
+        for (int i = 0; i < ROTATION_INV_BASKET_COUNT; ++i) {
+            if (peakIndex != i && rBaskets[i] > subPeakValue) {
+                subPeakValue = rBaskets[i];
+                subPeakIndex = i;
+            }
+        }
+        if (subPeakIndex != -1) {
+            if (subPeakIndex == 0){
+                xL = ROTATION_INV_BASKET_COUNT - 1;
+            } else {
+                xL = subPeakIndex - 1;
+            }
+            if (subPeakIndex == ROTATION_INV_BASKET_COUNT - 1){
+                xR = 0;
+            } else {
+                xR = subPeakIndex + 1;
+            }
+            double angleOfSubPeak = maxInterp3f(
+                                        rBaskets[xL], subPeakValue, rBaskets[xR]);
+            InterestPoint copy = InterestPoint(point.x, point.y, point.value);
+            copy.setOrientation(angleOfSubPeak);
+            result.push_back(copy);
+        }
+    }
+    return result;
 }
 
 vector<InterestPoint> InterestPointsDetector::adaptiveNonMaximumSuppression(
@@ -152,7 +261,7 @@ vector<InterestPoint> InterestPointsDetector::filter(int radius,
         int yMin = center.y - radius;
         int yMax = center.y + radius;
         bool maxInLeftPart = true;
-        for(int i = indexOfCenter; i >= 0; --i){
+        for(int i = indexOfCenter; i >= 0; --i) {
             const InterestPoint& p = points.at(i);
             if(p.y < yMin){
                 break;

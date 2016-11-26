@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QMessageBox"
-#include "siftdescriptorssearcher.h"
+#include "descriptorssearcher.h"
 #include "descriptorsmatcher.h"
 using namespace std;
 
@@ -225,14 +225,14 @@ void MainWindow::on_bSearchDescriptors_clicked() {
         GradientAlgorithm algorithm = ui->rbGradSimple->isChecked()
                                       ? GradientAlgorithm::SIMPLE
                                       : GradientAlgorithm::SOBEL;
-        vector<Descriptor<SIFT_DESC_SIZE>> descriptors1
+        vector<Descriptor<DESC_SIZE>> descriptors1
                 = search(image1, points1, type, algorithm, smoothed, sigma);
 
-        vector<Descriptor<SIFT_DESC_SIZE>> descriptors2
+        vector<Descriptor<DESC_SIZE>> descriptors2
                 = search(image2, points2, type, algorithm, smoothed, sigma);
 
-        vector<pair<Descriptor<SIFT_DESC_SIZE>,
-                Descriptor<SIFT_DESC_SIZE>>> pairs =
+        vector<pair<Descriptor<DESC_SIZE>,
+                Descriptor<DESC_SIZE>>> pairs =
                 associate(descriptors1, descriptors2);
         int height = original.height() > img2.height()
                      ? original.height() : img2.height();
@@ -246,10 +246,10 @@ void MainWindow::on_bSearchDescriptors_clicked() {
                                   (11 * i) % 256,
                                   (128 + 23 * i) % 256);
             painter.setPen(color);
-            pair<Descriptor<SIFT_DESC_SIZE>,
-                    Descriptor<SIFT_DESC_SIZE>> p= pairs.at(i);
-            const Descriptor<SIFT_DESC_SIZE> d1 = p.first;
-            const Descriptor<SIFT_DESC_SIZE> d2 = p.second;
+            pair<Descriptor<DESC_SIZE>,
+                    Descriptor<DESC_SIZE>> p= pairs.at(i);
+            const Descriptor<DESC_SIZE> d1 = p.first;
+            const Descriptor<DESC_SIZE> d2 = p.second;
             painter.drawRect(d1.getX(), d1.getY(), 3, 3);
             painter.drawRect(d2.getX() + img2.width(), d2.getY(), 3, 3);
             painter.drawLine(d1.getX(), d1.getY(),

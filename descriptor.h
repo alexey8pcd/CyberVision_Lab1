@@ -46,11 +46,12 @@ template <int length> class Descriptor {
 
         void printInfo(){
             cout << "Descriptor: " << x << "; " <<
-                        y << endl << "Elements: [";
-            for (int i = 0; i < length; ++i) {
-                cout << baskets[i] << " ";
-            }
-            cout << "]" << endl << endl;
+                        y << endl;
+//            cout << "Elements: [";
+//            for (int i = 0; i < length; ++i) {
+//                cout << baskets[i] << " ";
+//            }
+//            cout << "]" << endl << endl;
          }
 
         float getDistance(Descriptor &descriptor) const{

@@ -13,14 +13,27 @@ struct InterestPoint{
     int x;
     int y;
     float value;
+    double orientation;
+
     InterestPoint(int x, int y, float value){
         this->x = x;
         this->y = y;
         this->value = value;
+        this->orientation = 0;
     }
+
+    void setOrientation(double value){
+        this->orientation = value;
+    }
+
+    double getOrientation() const {
+        return this->orientation;
+    }
+
     QString toQString() const {
         QString s = QString::number(x);
-        s.append(";").append(QString::number(y));
+        s.append(";").append(QString::number(y)).
+                append(";").append(QString::number(orientation));
         return s;
     }
 };

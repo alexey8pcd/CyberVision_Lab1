@@ -29,9 +29,9 @@ PyramidBuilder::PyramidBuilder(FImage &image, EdgeType type,
     this->image = std::move(image);
     this->octavesCount = round(log2(image.getWidth() > image.getHeight()
                               ? image.getWidth() : image.getHeight())) - 2;
-    if(octavesCount <= 0){
+    if(octavesCount <= 0) {
         imagesBuffer = make_unique<FImage[]>(0);
-    }else{
+    } else {
         imagesBuffer = make_unique<FImage[]>(octavesCount * (levelsPerOctave + 3));
     }
 }
@@ -72,13 +72,13 @@ void PyramidBuilder::createOctaves() {
     }
     double initSigma = sqrt(sdiff);
     FImage img = prepareImage(initSigma);
-    img.normalize();
+    //img.normalize();
     int imageIndex = 0;
     imagesBuffer[imageIndex] = std::move(img);
     double k = pow(2, (1. / levelsPerOctave));
     double effecSigma = sigma;
     for(int i = 0; i < octavesCount; ++i) {
-        for(int j = (i == 0 ? 1: 0); j < levelsPerOctave; ++j) {
+        for(int j = 0; j < levelsPerOctave - 1; ++j) {
             double snext = effecSigma * k;
             double dlt = sqrt(snext * snext - effecSigma * effecSigma);
             Kernel kernelX1 = Kernel::createGaussSeparateKernelX(dlt);
@@ -88,15 +88,15 @@ void PyramidBuilder::createOctaves() {
             Convolution convY = Convolution(kernelY1, type);
             FImage imgX1 = convX.apply(prev);
             FImage imgY1 = convY.apply(imgX1);
-            imgY1.normalize();
+            //imgY1.normalize();
             imagesBuffer[++imageIndex] = std::move(imgY1);
             effecSigma = snext;
         }
-        if(i == 0){
-            ++imageIndex;
+        effecSigma /= 2;
+        if (i < octavesCount - 1) {
+            int prevIndex = imageIndex;
+            imagesBuffer[++imageIndex] = imagesBuffer[prevIndex].downscale(1);
         }
-        effecSigma /= 2 * k * k;
-        imagesBuffer[imageIndex] = imagesBuffer[imageIndex-1].downscale(1);
     }
 }
 

@@ -9,28 +9,29 @@ class Kernel
 {
 private:
     int width;
-    int heigth;
+    int height;
     unique_ptr<float[]> values;
-    void setWidth(int value);
+
     void setHeight(int value);
 public:
+    void setWidth(int value);
     int getWidth() const;
     int getHeight() const;
     float *getValues();
     float getValueByIndexes(int rowIndex, int columnIndex) const;
     float getValue(int x, int y) const;
     Kernel();
-    Kernel(int radius);
+    Kernel(int size);
     Kernel(int width, int height);
     Kernel(const Kernel &kernel);
     Kernel(Kernel &&kernel);
     Kernel& operator=(Kernel &&kernel){
         this->width = kernel.width;
-        this->heigth = kernel.heigth;
+        this->height = kernel.height;
         values = move(kernel.values);
         return *this;
     }
-
+    void printDebug();
     ~Kernel();
 
     static Kernel createGaussKernelByRadius(int radius);
